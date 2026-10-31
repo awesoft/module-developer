@@ -1,0 +1,61 @@
+<?php
+/**
+ * @var \Awesoft\Developer\Block\DebugBar $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$panels = $block->getPanels();
+?>
+<?php foreach ($panels as $panel): ?>
+    <section class="awesoft-db__panel" data-panel="<?= $escaper->escapeHtmlAttr($panel['code']) ?>">
+        <header class="awesoft-db__panel-header">
+            <h3><?= $escaper->escapeHtml($panel['label']) ?></h3>
+            <?php if ($panel['summary'] !== ''): ?>
+                <span class="awesoft-db__panel-summary"><?= $escaper->escapeHtml($panel['summary']) ?></span>
+            <?php endif; ?>
+            <?php if ($block->hasFormat($panel, 'sql')): ?>
+                <button type="button" class="awesoft-db__format" aria-pressed="true"
+                        title="<?= $escaper->escapeHtmlAttr(__('Switch between formatted and single-line SQL')) ?>">
+                    <?= $escaper->escapeHtml(__('Format SQL')) ?>
+                </button>
+            <?php endif; ?>
+            <input type="search" class="awesoft-db__filter"
+                   placeholder="<?= $escaper->escapeHtmlAttr(__('Filter rows')) ?>"
+                   aria-label="<?= $escaper->escapeHtmlAttr(__('Filter rows')) ?>">
+            <button type="button" class="awesoft-db__close"
+                    title="<?= $escaper->escapeHtmlAttr(__('Close panel')) ?>">&times;</button>
+        </header>
+        <div class="awesoft-db__panel-body">
+            <?php foreach ($panel['sections'] as $section): ?>
+                <?php if (!empty($section['title'])): ?>
+                    <h4 class="awesoft-db__title"><?= $escaper->escapeHtml($section['title']) ?></h4>
+                <?php endif; ?>
+                <?php if (empty($section['rows'])): ?>
+                    <p class="awesoft-db__empty"><?= $escaper->escapeHtml(__('Nothing to show')) ?></p>
+                    <?php continue; ?>
+                <?php endif; ?>
+                <table class="awesoft-db__table">
+                    <?php if (!empty($section['headers'])): ?>
+                        <thead>
+                        <tr>
+                            <?php foreach ($section['headers'] as $header): ?>
+                                <th><?= $escaper->escapeHtml($header) ?></th>
+                            <?php endforeach; ?>
+                        </tr>
+                        </thead>
+                    <?php endif; ?>
+                    <tbody>
+                    <?php foreach ($section['rows'] as $row): ?>
+                        <tr>
+                            <?php foreach ($row as $index => $cell): ?>
+                                <?php $format = $section['formats'][$index] ?? ''; ?>
+                                <?php $attr = $format ? ' data-format="' . $escaper->escapeHtmlAttr($format) . '"' : ''; ?>
+                                <td<?= /* @noEscape */ $attr ?>><?= $escaper->escapeHtml((string)$cell) ?></td>
+                            <?php endforeach; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endforeach; ?>
+        </div>
+    </section>
+<?php endforeach; ?>

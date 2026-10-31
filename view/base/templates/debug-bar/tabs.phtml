@@ -1,0 +1,19 @@
+<?php
+/**
+ * @var \Awesoft\Developer\Block\DebugBar $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$panels = $block->getPanels();
+?>
+<?php foreach ($panels as $panel): ?>
+    <?php $badge = $panel['badge'] ?? $panel['summary']; ?>
+    <button type="button" class="awesoft-db__tab" data-tab="<?= $escaper->escapeHtmlAttr($panel['code']) ?>"
+            title="<?= $escaper->escapeHtmlAttr($panel['summary']) ?>">
+        <span class="awesoft-db__label"><?= $escaper->escapeHtml($panel['label']) ?></span>
+        <?php if ($badge !== ''): ?>
+            <span class="awesoft-db__badge" data-status="<?= $escaper->escapeHtmlAttr($panel['status']) ?>">
+                <?= $escaper->escapeHtml($badge) ?>
+            </span>
+        <?php endif; ?>
+    </button>
+<?php endforeach; ?>

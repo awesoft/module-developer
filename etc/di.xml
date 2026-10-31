@@ -3,4 +3,31 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
   <preference for="Magento\Framework\App\ExceptionHandlerInterface"
               type="Awesoft\Developer\Model\App\ExceptionHandler" />
+  <type name="Awesoft\Developer\Model\App\ExceptionHandler">
+    <arguments>
+      <argument name="magentoDataTable" xsi:type="object">Awesoft\Developer\Model\Whoops\MagentoDataTable\Proxy</argument>
+    </arguments>
+  </type>
+  <type name="Awesoft\Developer\Model\DebugBar\CollectorPool">
+    <arguments>
+      <argument name="collectors" xsi:type="array">
+        <item name="request" xsi:type="object">Awesoft\Developer\Model\DebugBar\Collector\Request</item>
+        <item name="performance" xsi:type="object">Awesoft\Developer\Model\DebugBar\Collector\Performance</item>
+        <item name="database" xsi:type="object">Awesoft\Developer\Model\DebugBar\Collector\Database</item>
+        <item name="layout" xsi:type="object">Awesoft\Developer\Model\DebugBar\Collector\Layout</item>
+        <item name="events" xsi:type="object">Awesoft\Developer\Model\DebugBar\Collector\Events</item>
+        <item name="environment" xsi:type="object">Awesoft\Developer\Model\DebugBar\Collector\Environment</item>
+      </argument>
+    </arguments>
+  </type>
+  <type name="Magento\Framework\Event\Manager">
+    <plugin name="awesoft_developer_record_events" type="Awesoft\Developer\Plugin\Event\RecordEvents" />
+  </type>
+  <type name="Magento\Framework\Console\CommandListInterface">
+    <arguments>
+      <argument name="commands" xsi:type="array">
+        <item name="awesoft_developer_toggle" xsi:type="object">Awesoft\Developer\Console\Command\ToggleCommand</item>
+      </argument>
+    </arguments>
+  </type>
 </config>

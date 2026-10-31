@@ -17,6 +17,65 @@
           <label>Open In Editor</label>
           <source_model>Awesoft\Developer\Model\Config\Source\Editors</source_model>
           <config_path>awesoft/developer/whoops_editor</config_path>
+          <depends>
+            <field id="use_whoops">1</field>
+          </depends>
+        </field>
+        <field id="whoops_editor_url" translate="label comment" type="text" sortOrder="30" showInDefault="1">
+          <label>Custom Editor URL</label>
+          <config_path>awesoft/developer/whoops_editor_url</config_path>
+          <comment>Use %file and %line placeholders, e.g. myeditor://open?file=%file&amp;line=%line</comment>
+          <depends>
+            <field id="use_whoops">1</field>
+            <field id="whoops_editor">custom</field>
+          </depends>
+        </field>
+        <field id="whoops_path_mapping" translate="label comment" type="textarea" sortOrder="40" showInDefault="1">
+          <label>Editor Path Mapping</label>
+          <config_path>awesoft/developer/whoops_path_mapping</config_path>
+          <comment>One server=local mapping per line so editor links open on your machine, e.g. /app=/Users/me/project</comment>
+          <depends>
+            <field id="use_whoops">1</field>
+          </depends>
+        </field>
+        <field id="whoops_hidden_keys" translate="label comment" type="textarea" sortOrder="50" showInDefault="1">
+          <label>Extra Hidden Keys</label>
+          <config_path>awesoft/developer/whoops_hidden_keys</config_path>
+          <comment>One per line. Keys of GET, POST, COOKIE, SERVER and ENV to mask. Cookies and keys containing pass, secret, key, token, auth, session or cookie are always masked.</comment>
+          <depends>
+            <field id="use_whoops">1</field>
+          </depends>
+        </field>
+        <field id="debug_bar" translate="label comment" type="select" sortOrder="60" showInDefault="1" canRestore="1">
+          <label>Debug Bar</label>
+          <config_path>awesoft/developer/debug_bar</config_path>
+          <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+          <comment>Developer mode only. Respects Developer Client Restrictions (Allowed IPs).</comment>
+        </field>
+        <field id="debug_bar_frontend" translate="label" type="select" sortOrder="70" showInDefault="1" canRestore="1">
+          <label>Show Debug Bar On Storefront</label>
+          <config_path>awesoft/developer/debug_bar_frontend</config_path>
+          <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+          <depends>
+            <field id="debug_bar">1</field>
+          </depends>
+        </field>
+        <field id="debug_bar_adminhtml" translate="label" type="select" sortOrder="80" showInDefault="1" canRestore="1">
+          <label>Show Debug Bar In Admin</label>
+          <config_path>awesoft/developer/debug_bar_adminhtml</config_path>
+          <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+          <depends>
+            <field id="debug_bar">1</field>
+          </depends>
+        </field>
+        <field id="debug_bar_api" translate="label comment" type="select" sortOrder="90" showInDefault="1" canRestore="1">
+          <label>Profile API Requests (REST/GraphQL)</label>
+          <config_path>awesoft/developer/debug_bar_api</config_path>
+          <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+          <comment>Lets the debug bar's AJAX tab inspect checkout and other web API calls.</comment>
+          <depends>
+            <field id="debug_bar">1</field>
+          </depends>
         </field>
       </group>
     </section>

@@ -1,0 +1,494 @@
+<?php
+/**
+ * Self-contained so it renders the same on Luma, Hyvä and the admin
+ *
+ * @var \Awesoft\Developer\Block\DebugBar $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+?>
+<div id="awesoft-debug-bar" class="awesoft-db" data-state="collapsed"
+     data-panel-url="<?= $escaper->escapeUrl($block->getPanelUrl()) ?>"
+     data-token-header="<?= $escaper->escapeHtmlAttr($block::TOKEN_HEADER) ?>">
+    <div class="awesoft-db__drawer">
+        <div class="awesoft-db__resize" title="<?= $escaper->escapeHtmlAttr(__('Drag to resize')) ?>"></div>
+        <div class="awesoft-db__request-panels"><?= /* @noEscape */ $block->renderPartial('panels') ?></div>
+        <section class="awesoft-db__panel" data-panel="ajax">
+            <header class="awesoft-db__panel-header">
+                <h3><?= $escaper->escapeHtml(__('AJAX')) ?></h3>
+                <span class="awesoft-db__panel-summary" data-ajax-summary>
+                    <?= $escaper->escapeHtml(__('No requests yet')) ?>
+                </span>
+                <input type="search" class="awesoft-db__filter"
+                       placeholder="<?= $escaper->escapeHtmlAttr(__('Filter rows')) ?>"
+                       aria-label="<?= $escaper->escapeHtmlAttr(__('Filter rows')) ?>">
+                <button type="button" class="awesoft-db__close"
+                        title="<?= $escaper->escapeHtmlAttr(__('Close panel')) ?>">&times;</button>
+            </header>
+            <div class="awesoft-db__panel-body">
+                <p class="awesoft-db__empty" data-ajax-empty>
+                    <?= $escaper->escapeHtml(__('AJAX and fetch requests made by this page show up here.')) ?>
+                </p>
+                <table class="awesoft-db__table awesoft-db__ajax-table" data-ajax-table hidden>
+                    <thead>
+                    <tr>
+                        <th><?= $escaper->escapeHtml(__('Method')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Status')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('URL')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Time')) ?></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+    <nav class="awesoft-db__bar">
+        <button type="button" class="awesoft-db__toggle"
+                title="<?= $escaper->escapeHtmlAttr(__('Show or hide the debug bar')) ?>">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4
+                2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7
+                1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0
+                7z" transform="translate(-1 0)"/>
+            </svg>
+        </button>
+        <div class="awesoft-db__tabs">
+            <div class="awesoft-db__request-tabs"><?= /* @noEscape */ $block->renderPartial('tabs') ?></div>
+        </div>
+        <button type="button" class="awesoft-db__tab awesoft-db__tab--ajax" data-tab="ajax">
+            <span class="awesoft-db__label"><?= $escaper->escapeHtml(__('AJAX')) ?></span>
+            <span class="awesoft-db__badge" data-ajax-count>0</span>
+        </button>
+        <button type="button" class="awesoft-db__viewing" hidden
+                title="<?= $escaper->escapeHtmlAttr(__('Back to the page request')) ?>"></button>
+    </nav>
+</div>
+<?php $style = <<<'CSS'
+#awesoft-debug-bar{--db-bg:#222;--db-bg-2:#2d2d2d;--db-bg-3:#383838;--db-line:#444;--db-text:#f5f5f5;
+--db-muted:#aaa;--db-accent:#f26322;--db-ok:#4f805d;--db-warning:#a46a1f;--db-error:#b0413e;--db-key:#99cdd8;
+position:fixed;left:0;right:0;bottom:0;z-index:2147483000;color:var(--db-text);text-align:left;
+font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;letter-spacing:normal}
+#awesoft-debug-bar *{box-sizing:border-box}
+#awesoft-debug-bar[data-state=collapsed]{right:auto}
+#awesoft-debug-bar[data-state=collapsed] .awesoft-db__tabs,
+#awesoft-debug-bar[data-state=collapsed] .awesoft-db__drawer{display:none}
+#awesoft-debug-bar button{all:unset;box-sizing:border-box;cursor:pointer}
+#awesoft-debug-bar [hidden]{display:none!important}
+#awesoft-debug-bar .awesoft-db__request-tabs,#awesoft-debug-bar .awesoft-db__request-panels{display:contents}
+#awesoft-debug-bar .awesoft-db__viewing{display:block;flex:0 1 auto;max-width:28%;padding:0 12px;line-height:36px;
+background:var(--db-accent);color:#fff;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#awesoft-debug-bar .awesoft-db__viewing:hover{filter:brightness(1.1)}
+#awesoft-debug-bar .awesoft-db__inspect{padding:2px 8px;border:1px solid var(--db-line);border-radius:4px;
+color:var(--db-text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:12px}
+#awesoft-debug-bar .awesoft-db__inspect:hover{border-color:var(--db-accent)}
+#awesoft-debug-bar tr.is-selected td{background:rgba(242,99,34,.15)}
+#awesoft-debug-bar .awesoft-db__tab--ajax{border-right:0;border-left:1px solid var(--db-line)}
+#awesoft-debug-bar .awesoft-db__ajax-table th,#awesoft-debug-bar .awesoft-db__ajax-table td{width:1%;white-space:nowrap;
+word-break:normal}
+#awesoft-debug-bar .awesoft-db__ajax-table th:nth-child(3),
+#awesoft-debug-bar .awesoft-db__ajax-table td:nth-child(3){width:auto;white-space:normal;word-break:break-all}
+#awesoft-debug-bar .awesoft-db__bar{display:flex;align-items:stretch;height:36px;background:var(--db-bg);
+box-shadow:0 -1px 0 var(--db-line),0 -2px 12px rgba(0,0,0,.25)}
+#awesoft-debug-bar .awesoft-db__toggle{display:flex;align-items:center;justify-content:center;width:40px;
+background:var(--db-accent);color:#fff}
+#awesoft-debug-bar .awesoft-db__toggle:hover{filter:brightness(1.1)}
+#awesoft-debug-bar .awesoft-db__tabs{display:flex;flex:1;overflow-x:auto;scrollbar-width:none;
+-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent);
+mask-image:linear-gradient(to right,#000 calc(100% - 48px),transparent)}
+#awesoft-debug-bar .awesoft-db__tab{display:flex;align-items:center;gap:8px;padding:0 14px;
+border-right:1px solid var(--db-line);white-space:nowrap;color:var(--db-muted)}
+#awesoft-debug-bar .awesoft-db__tab:hover{background:var(--db-bg-2);color:var(--db-text)}
+#awesoft-debug-bar .awesoft-db__tab.is-active{background:var(--db-bg-3);color:var(--db-text);
+box-shadow:inset 0 -3px 0 var(--db-accent)}
+#awesoft-debug-bar .awesoft-db__label{font-size:13px}
+#awesoft-debug-bar .awesoft-db__badge{padding:2px 8px;border-radius:4px;background:var(--db-bg-3);color:var(--db-text);
+font:600 12px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;max-width:360px;overflow:hidden;
+text-overflow:ellipsis;white-space:nowrap}
+#awesoft-debug-bar .awesoft-db__badge[data-status=ok]{background:var(--db-ok)}
+#awesoft-debug-bar .awesoft-db__badge[data-status=warning]{background:var(--db-warning)}
+#awesoft-debug-bar .awesoft-db__badge[data-status=error]{background:var(--db-error)}
+#awesoft-debug-bar .awesoft-db__drawer{position:relative;display:none;height:40vh;min-height:120px;max-height:85vh;
+background:var(--db-bg-2);border-top:1px solid var(--db-line)}
+#awesoft-debug-bar.has-panel:not([data-state=collapsed]) .awesoft-db__drawer{display:block}
+#awesoft-debug-bar .awesoft-db__resize{position:absolute;top:-4px;left:0;right:0;height:8px;cursor:ns-resize;z-index:1;
+touch-action:none}
+#awesoft-debug-bar .awesoft-db__panel{display:none;flex-direction:column;height:100%}
+#awesoft-debug-bar .awesoft-db__panel.is-active{display:flex}
+#awesoft-debug-bar .awesoft-db__panel-header{display:flex;align-items:center;gap:12px;padding:8px 16px;
+background:var(--db-bg);border-bottom:1px solid var(--db-line)}
+#awesoft-debug-bar .awesoft-db__panel-header h3{margin:0;padding:0;font-family:inherit;font-weight:600;font-size:15px;line-height:1.4;
+color:var(--db-text)}
+#awesoft-debug-bar .awesoft-db__panel-summary{color:var(--db-muted)}
+#awesoft-debug-bar .awesoft-db__filter{margin:0 0 0 auto;width:240px;height:28px;padding:0 10px;border:1px solid var(--db-line);
+border-radius:4px;background:var(--db-bg-2);color:var(--db-text);font-family:inherit;font-size:13px;line-height:1;box-shadow:none}
+#awesoft-debug-bar .awesoft-db__filter:focus{outline:none;border-color:var(--db-accent)}
+#awesoft-debug-bar .awesoft-db__close{display:flex;align-items:center;justify-content:center;width:28px;height:28px;
+border-radius:4px;color:var(--db-muted);font-size:22px;line-height:1}
+#awesoft-debug-bar .awesoft-db__close:hover{background:var(--db-bg-3);color:var(--db-text)}
+#awesoft-debug-bar .awesoft-db__panel-body{flex:1;overflow:auto;padding:4px 16px 16px}
+#awesoft-debug-bar .awesoft-db__title{margin:16px 0 6px;padding:0;color:var(--db-accent);
+font-family:inherit;font-weight:600;font-size:12px;line-height:1.4;text-transform:uppercase;letter-spacing:.06em}
+#awesoft-debug-bar .awesoft-db__empty{margin:12px 0;color:var(--db-muted)}
+#awesoft-debug-bar .awesoft-db__table{width:100%;margin:0;border-collapse:collapse;background:none;
+font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+#awesoft-debug-bar .awesoft-db__table th,
+#awesoft-debug-bar .awesoft-db__table td{padding:6px 10px;border:0;border-bottom:1px solid var(--db-line);
+vertical-align:top;text-align:left;color:var(--db-text);background:none;font:inherit;word-break:break-word}
+#awesoft-debug-bar .awesoft-db__table th{position:sticky;top:0;background:var(--db-bg-2);color:var(--db-muted);
+font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.05em}
+#awesoft-debug-bar .awesoft-db__table tbody tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+#awesoft-debug-bar .awesoft-db__table tbody tr:hover td{background:rgba(255,255,255,.06)}
+#awesoft-debug-bar .awesoft-db__table td:first-child{width:1%;padding-right:28px;white-space:nowrap;
+word-break:normal;color:var(--db-key)}
+#awesoft-debug-bar .awesoft-db__table tr.is-hidden{display:none}
+#awesoft-debug-bar .awesoft-db__table td[data-format=sql]{white-space:normal}
+#awesoft-debug-bar .awesoft-db__table td[data-format=sql].is-formatted{white-space:pre-wrap;word-break:normal;
+overflow-wrap:anywhere}
+#awesoft-debug-bar .awesoft-db__format{margin-left:auto;height:28px;white-space:nowrap;padding:0 10px;border:1px solid var(--db-line);
+border-radius:4px;color:var(--db-muted);font-size:12px;line-height:26px}
+#awesoft-debug-bar .awesoft-db__format:hover{color:var(--db-text)}
+#awesoft-debug-bar .awesoft-db__format[aria-pressed=true]{border-color:var(--db-accent);color:var(--db-text)}
+#awesoft-debug-bar .awesoft-db__format + .awesoft-db__filter{margin-left:0}
+#awesoft-debug-bar .awesoft-db__sql-keyword{color:#ff7b72;font-weight:600}
+#awesoft-debug-bar .awesoft-db__sql-function{color:#d2a8ff}
+#awesoft-debug-bar .awesoft-db__sql-identifier{color:#7ee787}
+#awesoft-debug-bar .awesoft-db__sql-string{color:#a5d6ff}
+#awesoft-debug-bar .awesoft-db__sql-number{color:#79c0ff}
+#awesoft-debug-bar .awesoft-db__sql-param{color:#f2cc60}
+@media (max-width:640px){
+#awesoft-debug-bar .awesoft-db__tabs{scroll-snap-type:x proximity}
+#awesoft-debug-bar .awesoft-db__tab{gap:6px;padding:0 10px;scroll-snap-align:start}
+#awesoft-debug-bar .awesoft-db__tab--ajax{padding:0 10px}
+#awesoft-debug-bar .awesoft-db__ajax-table td{width:auto;white-space:normal}
+#awesoft-debug-bar .awesoft-db__badge{max-width:160px;overflow:hidden;text-overflow:ellipsis}
+#awesoft-debug-bar .awesoft-db__drawer{height:60vh}
+#awesoft-debug-bar .awesoft-db__resize{top:-8px;height:16px}
+#awesoft-debug-bar .awesoft-db__panel-header{flex-wrap:wrap;gap:4px 8px;padding:8px 12px}
+#awesoft-debug-bar .awesoft-db__panel-header::after{content:"";order:2;flex-basis:100%;height:0}
+#awesoft-debug-bar .awesoft-db__panel-header h3{font-size:14px}
+#awesoft-debug-bar .awesoft-db__panel-summary{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#awesoft-debug-bar .awesoft-db__close{order:1;margin-left:auto}
+#awesoft-debug-bar .awesoft-db__format{order:3;margin-left:0}
+#awesoft-debug-bar .awesoft-db__filter{order:4;flex:1 1 auto;width:auto;min-width:0;margin-left:0}
+#awesoft-debug-bar .awesoft-db__panel-body{padding:4px 12px 12px}
+#awesoft-debug-bar .awesoft-db__table thead{display:none}
+#awesoft-debug-bar .awesoft-db__table tr{display:block;padding:6px 0;border-bottom:1px solid var(--db-line)}
+#awesoft-debug-bar .awesoft-db__table tr.is-hidden{display:none}
+#awesoft-debug-bar .awesoft-db__table td{display:block;width:auto;padding:2px 4px;border:0}
+#awesoft-debug-bar .awesoft-db__table td:first-child{width:auto;padding-right:4px;font-size:11.5px;white-space:normal;
+word-break:break-word}
+#awesoft-debug-bar .awesoft-db__table td:only-child{font-size:inherit}
+}
+CSS;
+$script = <<<'JS'
+(function () {
+    var root = document.getElementById('awesoft-debug-bar'), drawer = root.querySelector('.awesoft-db__drawer');
+    var requestTabs = root.querySelector('.awesoft-db__request-tabs');
+    var requestPanels = root.querySelector('.awesoft-db__request-panels');
+    var viewing = root.querySelector('.awesoft-db__viewing');
+    var panelUrl = root.dataset.panelUrl, tokenHeader = root.dataset.tokenHeader;
+    var pageNodes = {tabs: children(requestTabs), panels: children(requestPanels)};
+    var key = 'awesoft-debug-bar', saved = {};
+    try { saved = JSON.parse(localStorage.getItem(key)) || {}; } catch (e) {}
+    function save() { try { localStorage.setItem(key, JSON.stringify(saved)); } catch (e) {} }
+    function children(element) { return Array.prototype.slice.call(element.children); }
+    function replaceChildren(element, nodes) {
+        element.textContent = '';
+        nodes.forEach(function (node) { element.appendChild(node); });
+    }
+    function select(code) {
+        if (code && !root.querySelector('[data-panel="' + code + '"]')) { code = null; }
+        root.querySelectorAll('[data-tab],[data-panel]').forEach(function (el) {
+            el.classList.toggle('is-active', !!code && (el.dataset.tab === code || el.dataset.panel === code));
+        });
+        root.classList.toggle('has-panel', !!code);
+        saved.tab = code;
+        if (code && code !== 'ajax') { saved.requestTab = code; }
+        save();
+    }
+    function setState(state) {
+        root.dataset.state = state;
+        saved.state = state;
+        save();
+    }
+    // whitespace is collapsed so a search still matches across formatted SQL line breaks
+    function filterRows(input) {
+        var term = input.value.toLowerCase().replace(/\s+/g, ' ').trim();
+        input.closest('.awesoft-db__panel').querySelectorAll('tbody tr').forEach(function (row) {
+            var text = row.textContent.toLowerCase().replace(/\s+/g, ' ');
+            row.classList.toggle('is-hidden', !!term && text.indexOf(term) === -1);
+        });
+    }
+    var sqlKeywords = {};
+    ('SELECT FROM WHERE AND OR NOT IN IS NULL AS ON JOIN INNER LEFT RIGHT OUTER CROSS STRAIGHT_JOIN UNION ALL '
+        + 'DISTINCT ORDER GROUP BY HAVING LIMIT OFFSET ASC DESC INSERT INTO VALUES UPDATE SET DELETE REPLACE IGNORE '
+        + 'DUPLICATE KEY CASE WHEN THEN ELSE END EXISTS BETWEEN LIKE REGEXP FOR USING WITH INTERVAL TRUE FALSE SHOW '
+        + 'DESCRIBE START TRANSACTION COMMIT ROLLBACK BEGIN LOCK UNLOCK TABLES CREATE ALTER DROP TABLE INDEX PRIMARY '
+        + 'FOREIGN REFERENCES TEMPORARY IF ENGINE DEFAULT').split(' ').forEach(function (word) {
+        sqlKeywords[word] = true;
+    });
+    // identifier | string | bind param | number | word followed by "(" | word
+    var sqlTokens = /(`[^`]*`)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|(:[A-Za-z_]\w*|\?)|(\b\d+(?:\.\d+)?\b)|(\b[A-Za-z_]\w*(?=\s*\())|(\b[A-Za-z_]\w*\b)/g;
+    // backtick identifier | string | whitespace | word | parenthesis or comma | anything else
+    var sqlParts = /`[^`]*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|\s+|[A-Za-z_]\w*|[(),]|[^\s`'"A-Za-z_(),]+/g;
+    var sqlClauses = {SELECT: 1, FROM: 1, WHERE: 1, HAVING: 1, LIMIT: 1, SET: 1, VALUES: 1, UNION: 1};
+    var sqlJoins = {LEFT: 1, RIGHT: 1, INNER: 1, CROSS: 1, OUTER: 1, NATURAL: 1};
+    // one clause per line, SELECT columns and AND/OR conditions indented, subqueries nested
+    function formatSql(sql) {
+        var parts = sql.match(sqlParts) || [], out = '', prev = '', stack = [{indent: 0, inline: false}];
+        function top() { return stack[stack.length - 1]; }
+        function nextWord(i, skipParentheses) {
+            for (var j = i + 1; j < parts.length; j++) {
+                if (!/^\s+$/.test(parts[j]) && !(skipParentheses && parts[j] === '(')) {
+                    return parts[j].toUpperCase();
+                }
+            }
+            return '';
+        }
+        function newline(extra) {
+            var pad = new Array(top().indent + (extra || 0) + 1).join('    ');
+            var current = out.slice(out.lastIndexOf('\n') + 1);
+            if (current.trim() === '') {
+                out = out.slice(0, out.length - current.length) + pad;
+            } else {
+                out = out.replace(/ +$/, '') + '\n' + pad;
+            }
+        }
+        parts.forEach(function (part, i) {
+            var upper = part.toUpperCase(), context = top();
+            if (/^\s+$/.test(part)) {
+                if (out && !/[\s(]$/.test(out)) { out += ' '; }
+                return;
+            }
+            if (part === '(') {
+                // Magento often wraps subqueries twice: "( (SELECT ...) UNION ALL (SELECT ...) )"
+                var subquery = nextWord(i, true) === 'SELECT';
+                if (subquery && /\w$/.test(out)) { out += ' '; }
+                out += '(';
+                if (subquery) {
+                    stack.push({indent: context.indent + 1, inline: false});
+                    newline();
+                } else {
+                    stack.push({indent: context.indent, inline: true});
+                }
+                prev = part;
+                return;
+            }
+            if (part === ')') {
+                if (stack.length > 1 && !stack.pop().inline) { newline(); }
+                out += ')';
+                prev = part;
+                return;
+            }
+            if (!context.inline) {
+                if (part === ',' && context.clause === 'SELECT') {
+                    out = out.replace(/ +$/, '') + ',';
+                    newline(1);
+                    prev = part;
+                    return;
+                }
+                if (sqlClauses[upper]
+                    || ((upper === 'ORDER' || upper === 'GROUP') && nextWord(i) === 'BY')
+                    || (sqlJoins[upper] && !sqlJoins[prev] && /^(JOIN|OUTER)$/.test(nextWord(i)))
+                    || (upper === 'JOIN' && !sqlJoins[prev])
+                ) {
+                    newline();
+                    context.clause = upper;
+                } else if ((upper === 'AND' || upper === 'OR') && !context.between) {
+                    newline(1);
+                }
+                if (upper === 'BETWEEN') { context.between = true; }
+                if (upper === 'AND') { context.between = false; }
+            }
+            out += part;
+            prev = upper;
+        });
+        return out.trim();
+    }
+    function highlightSql(cell, text) {
+        var fragment = document.createDocumentFragment(), last = 0, match, type, span;
+        sqlTokens.lastIndex = 0;
+        while ((match = sqlTokens.exec(text))) {
+            var word = match[5] || match[6];
+            if (match[1]) { type = 'identifier'; }
+            else if (match[2]) { type = 'string'; }
+            else if (match[3]) { type = 'param'; }
+            else if (match[4]) { type = 'number'; }
+            else if (sqlKeywords[word.toUpperCase()]) { type = 'keyword'; }
+            else if (match[5]) { type = 'function'; }
+            else { continue; }
+            fragment.appendChild(document.createTextNode(text.slice(last, match.index)));
+            span = document.createElement('span');
+            span.className = 'awesoft-db__sql-' + type;
+            span.textContent = match[0];
+            fragment.appendChild(span);
+            last = sqlTokens.lastIndex;
+        }
+        fragment.appendChild(document.createTextNode(text.slice(last)));
+        cell.textContent = '';
+        cell.appendChild(fragment);
+    }
+    function renderSql(formatted) {
+        root.querySelectorAll('td[data-format=sql]').forEach(function (cell) {
+            if (cell.awesoftSql === undefined) { cell.awesoftSql = cell.textContent.trim(); }
+            cell.classList.toggle('is-formatted', formatted);
+            highlightSql(cell, formatted ? formatSql(cell.awesoftSql) : cell.awesoftSql);
+        });
+        root.querySelectorAll('.awesoft-db__format').forEach(function (button) {
+            button.setAttribute('aria-pressed', String(formatted));
+        });
+        saved.formatSql = formatted;
+        save();
+    }
+
+    // AJAX: requests are listed as they finish; captured ones carry a token to load their panels
+    var nativeFetch = window.fetch, ajaxCount = 0, worstStatus = 0;
+    var ajaxBody = root.querySelector('[data-ajax-table] tbody');
+    // the debug bar's own calls and static/media assets (RequireJS loads templates over XHR) are not listed
+    function isIgnored(url) {
+        var path = String(url).replace(location.origin, '');
+        return String(url).indexOf(panelUrl.replace(/[?#].*$/, '')) === 0 || /^\/(pub\/)?(static|media)\//.test(path);
+    }
+    function shortUrl(url) { return String(url).replace(location.origin, ''); }
+    function statusType(status) {
+        return !status || status >= 500 ? 'error' : (status >= 400 ? 'warning' : 'ok');
+    }
+    function cell(row, text, className) {
+        var td = row.insertCell();
+        if (className) {
+            var span = document.createElement('span');
+            span.className = className;
+            span.textContent = text;
+            td.appendChild(span);
+        } else {
+            td.textContent = text;
+        }
+        return td;
+    }
+    function record(method, url, status, token, started) {
+        var row = ajaxBody.insertRow(0), badge, action;
+        row.awesoftRequest = {method: String(method || 'GET').toUpperCase(), url: shortUrl(url), token: token};
+        cell(row, row.awesoftRequest.method);
+        badge = cell(row, status || 'ERR', 'awesoft-db__badge').firstChild;
+        badge.dataset.status = statusType(status);
+        cell(row, row.awesoftRequest.url);
+        cell(row, Math.round(performance.now() - started) + ' ms');
+        action = row.insertCell();
+        if (token) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'awesoft-db__inspect';
+            button.textContent = 'Inspect';
+            action.appendChild(button);
+        } else {
+            action.textContent = '-';
+            action.title = 'Not profiled (other origin, web API or debug bar disabled for this area)';
+        }
+        ajaxCount++;
+        worstStatus = Math.max(worstStatus, status ? status : 500);
+        var count = root.querySelector('[data-ajax-count]');
+        count.textContent = ajaxCount;
+        count.dataset.status = statusType(worstStatus);
+        root.querySelector('[data-ajax-summary]').textContent = ajaxCount + (ajaxCount === 1 ? ' request' : ' requests');
+        root.querySelector('[data-ajax-empty]').hidden = true;
+        root.querySelector('[data-ajax-table]').hidden = false;
+    }
+    if (nativeFetch) {
+        window.fetch = function (input, init) {
+            var started = performance.now();
+            var url = typeof input === 'string' ? input : (input && input.url) || String(input);
+            var method = (init && init.method) || (input && input.method) || 'GET';
+            return nativeFetch.apply(this, arguments).then(function (response) {
+                if (!isIgnored(response.url || url)) {
+                    record(method, response.url || url, response.status, response.headers.get(tokenHeader), started);
+                }
+                return response;
+            });
+        };
+    }
+    var nativeOpen = XMLHttpRequest.prototype.open, nativeSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function (method, url) {
+        this.awesoftRequest = {method: method, url: String(url)};
+        return nativeOpen.apply(this, arguments);
+    };
+    XMLHttpRequest.prototype.send = function () {
+        var xhr = this, info = xhr.awesoftRequest;
+        if (info && !isIgnored(info.url)) {
+            var started = performance.now();
+            xhr.addEventListener('loadend', function () {
+                record(info.method, xhr.responseURL || info.url, xhr.status, xhr.getResponseHeader(tokenHeader), started);
+            });
+        }
+        return nativeSend.apply(this, arguments);
+    };
+    function inspect(row) {
+        var request = row.awesoftRequest;
+        nativeFetch.call(window, panelUrl + '?token=' + encodeURIComponent(request.token), {credentials: 'same-origin'})
+            .then(function (response) {
+                if (!response.ok) { throw new Error('Profile expired or not found (' + response.status + ')'); }
+                return response.text();
+            })
+            .then(function (html) {
+                var holder = document.createElement('div');
+                holder.innerHTML = html;
+                replaceChildren(requestTabs, children(holder.querySelector('[data-fragment=tabs]')));
+                replaceChildren(requestPanels, children(holder.querySelector('[data-fragment=panels]')));
+                ajaxBody.querySelectorAll('tr').forEach(function (tr) { tr.classList.toggle('is-selected', tr === row); });
+                viewing.textContent = 'AJAX: ' + request.method + ' ' + request.url + '  ×';
+                viewing.hidden = false;
+                renderSql(saved.formatSql !== false);
+                select(saved.requestTab || 'request');
+            })
+            .catch(function (error) { row.cells[4].textContent = error.message; });
+    }
+    function showPage() {
+        replaceChildren(requestTabs, pageNodes.tabs);
+        replaceChildren(requestPanels, pageNodes.panels);
+        ajaxBody.querySelectorAll('tr').forEach(function (tr) { tr.classList.remove('is-selected'); });
+        viewing.hidden = true;
+        select(saved.tab);
+    }
+
+    root.addEventListener('click', function (event) {
+        var target = event.target, tab = target.closest('[data-tab]');
+        if (tab) {
+            select(saved.tab === tab.dataset.tab ? null : tab.dataset.tab);
+        } else if (target.closest('.awesoft-db__toggle')) {
+            setState(root.dataset.state === 'collapsed' ? 'open' : 'collapsed');
+        } else if (target.closest('.awesoft-db__close')) {
+            select(null);
+        } else if (target.closest('.awesoft-db__format')) {
+            renderSql(saved.formatSql === false);
+        } else if (target.closest('.awesoft-db__inspect')) {
+            inspect(target.closest('tr'));
+        } else if (target.closest('.awesoft-db__viewing')) {
+            showPage();
+        }
+    });
+    root.addEventListener('input', function (event) {
+        if (event.target.classList.contains('awesoft-db__filter')) { filterRows(event.target); }
+    });
+    root.querySelector('.awesoft-db__resize').addEventListener('pointerdown', function (event) {
+        var startY = event.clientY, startHeight = drawer.offsetHeight;
+        event.preventDefault();
+        function move(e) { drawer.style.height = Math.max(120, startHeight + startY - e.clientY) + 'px'; }
+        function stop() {
+            document.removeEventListener('pointermove', move);
+            document.removeEventListener('pointerup', stop);
+            saved.height = drawer.offsetHeight;
+            save();
+        }
+        document.addEventListener('pointermove', move);
+        document.addEventListener('pointerup', stop);
+    });
+    if (saved.height) { drawer.style.height = saved.height + 'px'; }
+    renderSql(saved.formatSql !== false);
+    setState(saved.state || 'collapsed');
+    select(saved.tab || null);
+})();
+JS;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('style', [], $style, false) ?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>

@@ -6,6 +6,10 @@
       <developer>
         <use_whoops>1</use_whoops>
         <whoops_editor>phpstorm</whoops_editor>
+        <debug_bar>0</debug_bar>
+        <debug_bar_frontend>1</debug_bar_frontend>
+        <debug_bar_adminhtml>0</debug_bar_adminhtml>
+        <debug_bar_api>1</debug_bar_api>
       </developer>
     </awesoft>
   </default>
